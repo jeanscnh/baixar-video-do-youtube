@@ -27,7 +27,13 @@ baixar_audio_mp4() {
     echo "Baixando áudio do vídeo..."
 
     # Executa o script Python para baixar o áudio do vídeo em formato MP4
-    python3 -m pytube "$youtube_url" --output "$caminho_downloads/YouTubeDownloads" --only-audio --format mp4
+    python3 - <<END
+from pytube import YouTube
+
+yt = YouTube("$youtube_url")
+audio_stream = yt.streams.filter(only_audio=True, file_extension='mp4').first()
+audio_file = audio_stream.download(output_path="$caminho_downloads/YouTubeDownloads", filename='audio')
+END
 
     if [ $? -eq 0 ]; then
         echo "Áudio do vídeo baixado com sucesso."

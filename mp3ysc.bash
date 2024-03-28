@@ -6,47 +6,49 @@ if ! command -v python3 &>/dev/null; then
     exit 1
 fi
 
-# Verifica se o módulo 'pytube' está instalado
-if ! python3 -c "import pytube" &>/dev/null; then
-    echo "O módulo 'pytube' não está instalado. Por favor, instale-o com 'pip install pytube'."
+# Verifica se o módulo 'youtube-dl' está instalado
+if ! python3 -c "import youtube_dl" &>/dev/null; then
+    echo "O módulo 'youtube_dl' não está instalado. Por favor, instale-o com 'pip install youtube-dl'."
     exit 1
 fi
 
-# Define o caminho para a pasta "Downloads"
+# Define o diretório de downloads
 caminho_downloads="$HOME/storage/downloads"
 
-# Cria a pasta "YouTubeDownloads" na pasta "Downloads" se ainda não existir
-if [ ! -d "$caminho_downloads/YouTubeDownloads" ]; then
-    mkdir -p "$caminho_downloads/YouTubeDownloads"
-fi
+# Cria o diretório de downloads se não existir
+mkdir -p "$caminho_downloads"
 
-baixar_audio_m4a() {
+# Função para baixar o vídeo do YouTube
+baixar_video_youtube() {
     clear
     read -p "Digite a URL do vídeo do YouTube: " youtube_url
 
-    echo "Baixando áudio do vídeo..."
+    echo "Baixando o vídeo do YouTube..."
 
-    # Executa o script Python para baixar o áudio do vídeo em formato M4A
-    python3 - <<END
-from pytube import YouTube
+    # Executa o youtube-dl para baixar o vídeo
+    youtube-dl -o "$caminho_downloads/%(title)s.%(ext)s" "$youtube_url"
 
-yt = YouTube("$youtube_url")
-audio_stream = yt.streams.filter(only_audio=True, file_extension='m4a').first()
-audio_file = audio_stream.download(output_path="$caminho_downloads/YouTubeDownloads", filename='audio')
-END
-
-    if [ $? -eq 0 ]; then
-        echo "Áudio do vídeo baixado com sucesso."
-    else
-        echo "Falha ao baixar o áudio do vídeo."
-    fi
-
-    read -p "Pressione Enter para continuar..." 
+    echo "Download concluído. O vídeo foi salvo em: $caminho_downloads"
+    read -p "Pressione Enter para continuar..."
 }
 
-while true; do
+# Menu de opções
+menu() {
     clear
-    echo "Baixar Áudio M4A do YouTube"
-    echo "--------------------------"
-    baixar_audio_m4a
+    echo "App Termux - Baixar Vídeos do YouTube"
+    echo "--------------------------------------"
+    echo "1. Baixar Vídeo do YouTube"
+    echo "2. Sair"
+}
+
+# Loop principal
+while true; do
+    menu
+    read -p "Selecione uma opção: " opcao
+
+    case $opcao in
+        1) baixar_video_youtube ;;
+        2) exit ;;
+        *) echo "Opção inválida. Por favor, escolha uma opção válida." ;;
+    esac
 done

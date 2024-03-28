@@ -1,57 +1,64 @@
-#!/data/data/com.termux/files/usr/bin/bash
+@echo off
 
-# Verifica se o Python está instalado
-if ! command -v python3 &> /dev/null; then
-    echo "Python não encontrado. Instale o Python usando 'pkg install python'."
-    exit 1
-fi
+rem Verifica se o Python está instalado
+python --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo Python não encontrado. Certifique-se de que o Python está instalado e configurado no PATH.
+    exit /b
+)
 
-# Define o caminho para a pasta "Downloads"
-caminho_downloads=$HOME/storage/downloads
+rem Define o caminho para a pasta "Downloads"
+set "caminho_downloads=%USERPROFILE%\Downloads"
 
-# Cria a pasta "YouTubeDownloads" na pasta "Downloads" se ainda não existir
-mkdir -p "$caminho_downloads/YouTubeDownloads"
+rem Cria a pasta "YouTubeDownloads" na pasta "Downloads" se ainda não existir
+if not exist "%caminho_downloads%\YouTubeDownloads" mkdir "%caminho_downloads%\YouTubeDownloads"
 
-menu() {
-    clear
-    echo "Escolha uma opção:"
-    echo "1. Baixar MP3"
-    echo "2. Baixar vídeo em 720p"
-    echo "3. Baixar vídeo em 1080p"
-    echo "4. Sair"
-}
+:menu
+cls
+echo Escolha uma opção:
+echo 1. Baixar MP3
+echo 2. Baixar vídeo em 720p
+echo 3. Baixar vídeo em 1080p
+echo 4. Sair
 
-baixar_mp3() {
-    read -p "Digite a URL do vídeo do YouTube: " youtube_url
+set /p opcao=Opção:
 
-    # Executa o script Python para baixar o vídeo em MP3
-    python3 -c "from pytube import YouTube; yt = YouTube('$youtube_url'); stream = yt.streams.filter(only_audio=True).first(); stream.download(output_path='$caminho_downloads/YouTubeDownloads')"
-}
+if "%opcao%"=="1" goto :baixar_mp3
+if "%opcao%"=="2" goto :baixar_720p
+if "%opcao%"=="3" goto :baixar_1080p
+if "%opcao%"=="4" exit /b
 
-baixar_720p() {
-    read -p "Digite a URL do vídeo do YouTube: " youtube_url
+:baixar_mp3
+cls
+set /p youtube_url=Digite a URL do vídeo do YouTube: 
 
-    # Executa o script Python para baixar o vídeo em 720p
-    python3 -c "from pytube import YouTube; YouTube('$youtube_url').streams.filter(res='720p').first().download(output_path='$caminho_downloads/YouTubeDownloads')"
-}
+rem Cria um arquivo temporário em Python para baixar o vídeo do YouTube em MP3
+echo from pytube import YouTube^; yt = YouTube("%youtube_url%")^; stream = yt.streams.filter(only_audio=True).first()^; stream.download(output_path=r"%caminho_downloads%\YouTubeDownloads") > download_youtube.py
 
-baixar_1080p() {
-    read -p "Digite a URL do vídeo do YouTube: " youtube_url
+rem Executa o script Python para baixar o vídeo
+python download_youtube.py
 
-    # Executa o script Python para baixar o vídeo em 1080p
-    python3 -c "from pytube import YouTube; YouTube('$youtube_url').streams.filter(res='1080p').first().download(output_path='$caminho_downloads/YouTubeDownloads')"
-}
+rem Apaga o arquivo temporário Python
+del download_youtube.py
+pause
+goto :menu
 
-while true; do
-    menu
+:baixar_720p
+cls
+set /p youtube_url=Digite a URL do vídeo do YouTube: 
 
-    read -p "Opção: " opcao
+rem Executa o script Python para baixar o vídeo em 720p
+python -c "from pytube import YouTube; YouTube('%youtube_url%').streams.filter(res='720p').first().download(output_path=r'%caminho_downloads%\YouTubeDownloads')"
 
-    case $opcao in
-        1) baixar_mp3 ;;
-        2) baixar_720p ;;
-        3) baixar_1080p ;;
-        4) exit ;;
-        *) echo "Opção inválida. Tente novamente." ;;
-    esac
-done
+pause
+goto :menu
+
+:baixar_1080p
+cls
+set /p youtube_url=Digite a URL do vídeo do YouTube: 
+
+rem Executa o script Python para baixar o vídeo em 1080p
+python -c "from pytube import YouTube; YouTube('%youtube_url%').streams.filter(res='1080p').first().download(output_path=r'%caminho_downloads%\YouTubeDownloads')"
+
+pause
+goto :menu

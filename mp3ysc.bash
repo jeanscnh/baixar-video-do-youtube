@@ -20,18 +20,18 @@ if [ ! -d "$caminho_downloads/YouTubeDownloads" ]; then
     mkdir -p "$caminho_downloads/YouTubeDownloads"
 fi
 
-baixar_audio_mp4() {
+baixar_audio_m4a() {
     clear
     read -p "Digite a URL do vídeo do YouTube: " youtube_url
 
     echo "Baixando áudio do vídeo..."
 
-    # Executa o script Python para baixar o áudio do vídeo em formato MP4
+    # Executa o script Python para baixar o áudio do vídeo em formato M4A
     python3 - <<END
 from pytube import YouTube
 
 yt = YouTube("$youtube_url")
-audio_stream = yt.streams.filter(only_audio=True, file_extension='mp4').first()
+audio_stream = yt.streams.filter(only_audio=True, file_extension='m4a').first()
 audio_file = audio_stream.download(output_path="$caminho_downloads/YouTubeDownloads", filename='audio')
 END
 
@@ -46,7 +46,7 @@ END
 
 while true; do
     clear
-    echo "Baixar Áudio MP4 do YouTube"
+    echo "Baixar Áudio M4A do YouTube"
     echo "--------------------------"
-    baixar_audio_mp4
+    baixar_audio_m4a
 done

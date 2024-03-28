@@ -1,54 +1,27 @@
 #!/bin/bash
 
-# Verifica se o Python está instalado
-if ! command -v python3 &>/dev/null; then
-    echo "Python não encontrado. Certifique-se de que o Python está instalado."
+# URL da imagem
+image_url="https://i.pinimg.com/originals/0d/44/9b/0d449b9b4c17d0e95f0f8b65ed4ba4a1.jpg"
+
+# Diretório de trabalho
+work_dir="$HOME/storage/downloads"
+
+# Nome do arquivo
+file_name="sticker.png"
+
+# Baixar a imagem
+wget -O "$work_dir/$file_name" "$image_url"
+
+# Verificar se a imagem foi baixada com sucesso
+if [ $? -ne 0 ]; then
+    echo "Erro ao baixar a imagem. Certifique-se de que a URL da imagem é válida."
     exit 1
 fi
 
-# Verifica se o módulo 'youtube-dl' está instalado
-if ! python3 -c "import youtube_dl" &>/dev/null; then
-    echo "O módulo 'youtube_dl' não está instalado. Por favor, instale-o com 'pip install youtube-dl'."
-    exit 1
-fi
+# Adicionar bordas à imagem
+convert "$work_dir/$file_name" -bordercolor white -border 10x10 "$work_dir/$file_name"
 
-# Define o diretório de downloads
-caminho_downloads="$HOME/storage/downloads"
+# Adicionar texto à imagem
+convert "$work_dir/$file_name" -gravity South -pointsize 36 -fill white -annotate +0+5 "Sua mensagem aqui" "$work_dir/$file_name"
 
-# Cria o diretório de downloads se não existir
-mkdir -p "$caminho_downloads"
-
-# Função para baixar o vídeo do YouTube
-baixar_video_youtube() {
-    clear
-    read -p "Digite a URL do vídeo do YouTube: " youtube_url
-
-    echo "Baixando o vídeo do YouTube..."
-
-    # Executa o youtube-dl para baixar o vídeo
-    youtube-dl -o "$caminho_downloads/%(title)s.%(ext)s" "$youtube_url"
-
-    echo "Download concluído. O vídeo foi salvo em: $caminho_downloads"
-    read -p "Pressione Enter para continuar..."
-}
-
-# Menu de opções
-menu() {
-    clear
-    echo "App Termux - Baixar Vídeos do YouTube"
-    echo "--------------------------------------"
-    echo "1. Baixar Vídeo do YouTube"
-    echo "2. Sair"
-}
-
-# Loop principal
-while true; do
-    menu
-    read -p "Selecione uma opção: " opcao
-
-    case $opcao in
-        1) baixar_video_youtube ;;
-        2) exit ;;
-        *) echo "Opção inválida. Por favor, escolha uma opção válida." ;;
-    esac
-done
+echo "Figurinha gerada com sucesso em: $work_dir/$file_name"

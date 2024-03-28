@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # Verifica se o Python está instalado
-python3 --version >/dev/null 2>&1
-if [ $? -ne 0 ]; then
+if ! command -v python3 &>/dev/null; then
     echo "Python não encontrado. Certifique-se de que o Python está instalado."
     exit 1
 fi
@@ -18,45 +17,26 @@ fi
 menu() {
     clear
     echo "Escolha uma opção:"
-    echo "1. Baixar MP3"
-    echo "2. Baixar vídeo em 720p"
-    echo "3. Baixar vídeo em 1080p"
-    echo "4. Sair"
+    echo "1. Baixar vídeo em 720p (MP4)"
+    echo "2. Baixar vídeo em 1080p (MP4)"
+    echo "3. Sair"
 }
 
-baixar_mp3() {
+baixar_video() {
     clear
     read -p "Digite a URL do vídeo do YouTube: " youtube_url
+    local resolucao=$1
+    echo "Baixando vídeo em $resolucao..."
 
-    # Cria um arquivo temporário em Python para baixar o vídeo do YouTube em MP3
-    echo "from pytube import YouTube" > download_youtube.py
-    echo "yt = YouTube('$youtube_url')" >> download_youtube.py
-    echo "stream = yt.streams.filter(only_audio=True).first()" >> download_youtube.py
-    echo "stream.download(output_path=r'$caminho_downloads/YouTubeDownloads')" >> download_youtube.py
+    # Executa o script Python para baixar o vídeo na resolução especificada (720p ou 1080p)
+    python3 -m pytube "$youtube_url" --output "$caminho_downloads/YouTubeDownloads" --resolution "$resolucao"
 
-    # Executa o script Python para baixar o vídeo
-    python3 download_youtube.py
+    if [ $? -eq 0 ]; then
+        echo "Vídeo baixado em $resolucao."
+    else
+        echo "Falha ao baixar o vídeo em $resolucao."
+    fi
 
-    # Apaga o arquivo temporário Python
-    rm download_youtube.py
-    read -p "Pressione Enter para continuar..." 
-}
-
-baixar_720p() {
-    clear
-    read -p "Digite a URL do vídeo do YouTube: " youtube_url
-
-    # Executa o script Python para baixar o vídeo em 720p
-    python3 -c "from pytube import YouTube; YouTube('$youtube_url').streams.filter(res='720p').first().download(output_path=r'$caminho_downloads/YouTubeDownloads')"
-    read -p "Pressione Enter para continuar..." 
-}
-
-baixar_1080p() {
-    clear
-    read -p "Digite a URL do vídeo do YouTube: " youtube_url
-
-    # Executa o script Python para baixar o vídeo em 1080p
-    python3 -c "from pytube import YouTube; YouTube('$youtube_url').streams.filter(res='1080p').first().download(output_path=r'$caminho_downloads/YouTubeDownloads')"
     read -p "Pressione Enter para continuar..." 
 }
 
@@ -65,10 +45,9 @@ while true; do
     read -p "Opção: " opcao
 
     case $opcao in
-        1) baixar_mp3 ;;
-        2) baixar_720p ;;
-        3) baixar_1080p ;;
-        4) exit ;;
+        1) baixar_video "720p" ;;
+        2) baixar_video "1080p" ;;
+        3) exit ;;
         *) echo "Opção inválida. Por favor, escolha uma opção válida." ;;
     esac
 done

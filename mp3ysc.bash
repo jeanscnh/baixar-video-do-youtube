@@ -7,7 +7,7 @@ if ! command -v python3 &> /dev/null; then
 fi
 
 # Define o caminho para a pasta "Downloads"
-caminho_downloads=$HOME/storage/shared/Downloads
+caminho_downloads=$HOME/storage/downloads
 
 # Cria a pasta "YouTubeDownloads" na pasta "Downloads" se ainda não existir
 mkdir -p "$caminho_downloads/YouTubeDownloads"

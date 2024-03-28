@@ -6,6 +6,12 @@ if ! command -v python3 &>/dev/null; then
     exit 1
 fi
 
+# Verifica se o módulo 'pytube' está instalado
+if ! python3 -c "import pytube" &>/dev/null; then
+    echo "O módulo 'pytube' não está instalado. Por favor, instale-o com 'pip install pytube'."
+    exit 1
+fi
+
 # Define o caminho para a pasta "Downloads"
 caminho_downloads="$HOME/storage/downloads"
 
@@ -14,40 +20,27 @@ if [ ! -d "$caminho_downloads/YouTubeDownloads" ]; then
     mkdir -p "$caminho_downloads/YouTubeDownloads"
 fi
 
-menu() {
-    clear
-    echo "Escolha uma opção:"
-    echo "1. Baixar vídeo em 720p (MP4)"
-    echo "2. Baixar vídeo em 1080p (MP4)"
-    echo "3. Sair"
-}
-
-baixar_video() {
+baixar_audio_mp4() {
     clear
     read -p "Digite a URL do vídeo do YouTube: " youtube_url
-    local resolucao=$1
-    echo "Baixando vídeo em $resolucao..."
 
-    # Executa o script Python para baixar o vídeo na resolução especificada (720p ou 1080p)
-    python3 -m pytube "$youtube_url" --output "$caminho_downloads/YouTubeDownloads" --resolution "$resolucao"
+    echo "Baixando áudio do vídeo..."
+
+    # Executa o script Python para baixar o áudio do vídeo em formato MP4
+    python3 -m pytube "$youtube_url" --output "$caminho_downloads/YouTubeDownloads" --only-audio --format mp4
 
     if [ $? -eq 0 ]; then
-        echo "Vídeo baixado em $resolucao."
+        echo "Áudio do vídeo baixado com sucesso."
     else
-        echo "Falha ao baixar o vídeo em $resolucao."
+        echo "Falha ao baixar o áudio do vídeo."
     fi
 
     read -p "Pressione Enter para continuar..." 
 }
 
 while true; do
-    menu
-    read -p "Opção: " opcao
-
-    case $opcao in
-        1) baixar_video "720p" ;;
-        2) baixar_video "1080p" ;;
-        3) exit ;;
-        *) echo "Opção inválida. Por favor, escolha uma opção válida." ;;
-    esac
+    clear
+    echo "Baixar Áudio MP4 do YouTube"
+    echo "--------------------------"
+    baixar_audio_mp4
 done

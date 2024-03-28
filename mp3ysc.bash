@@ -1,27 +1,38 @@
 #!/bin/bash
 
-# URL da imagem
-image_url="https://i.pinimg.com/originals/0d/44/9b/0d449b9b4c17d0e95f0f8b65ed4ba4a1.jpg"
+# Função para gerar a figurinha
+gerar_figurinha() {
+    local url_imagem="https://i.pinimg.com/564x/b2/69/4c/b2694c550fcf3ab4d398a2157c9a9825.jpg"
+    local mensagem="Oi, filho da fruta"
+    local diretorio_trabalho="$HOME/storage/downloads"
+    local nome_arquivo="figurinha.png"
+    local caminho_arquivo="$diretorio_trabalho/$nome_arquivo"
 
-# Diretório de trabalho
-work_dir="$HOME/storage/downloads"
+    echo "Baixando imagem..."
+    wget -q -O "$caminho_arquivo" "$url_imagem"
 
-# Nome do arquivo
-file_name="sticker.png"
+    if [ $? -ne 0 ]; then
+        echo "Erro ao baixar a imagem. Certifique-se de que a URL da imagem é válida."
+        exit 1
+    fi
 
-# Baixar a imagem
-wget -O "$work_dir/$file_name" "$image_url"
+    echo "Adicionando mensagem à imagem..."
+    convert "$caminho_arquivo" -gravity South -pointsize 36 -fill white -annotate +0+5 "$mensagem" "$caminho_arquivo"
 
-# Verificar se a imagem foi baixada com sucesso
-if [ $? -ne 0 ]; then
-    echo "Erro ao baixar a imagem. Certifique-se de que a URL da imagem é válida."
-    exit 1
-fi
+    echo "Figurinha gerada com sucesso em: $caminho_arquivo"
+}
 
-# Adicionar bordas à imagem
-convert "$work_dir/$file_name" -bordercolor white -border 10x10 "$work_dir/$file_name"
+# Função para travar a tela por 10 minutos e impedir o desligamento do dispositivo
+travar_tela() {
+    echo "Travando a tela do celular por 10 minutos e impedindo o desligamento do dispositivo..."
+    termux-wake-lock
+    sleep 600 # 10 minutos
+    termux-wake-unlock
+    echo "Tela do celular travada por 10 minutos. O dispositivo pode ser desligado agora."
+}
 
-# Adicionar texto à imagem
-convert "$work_dir/$file_name" -gravity South -pointsize 36 -fill white -annotate +0+5 "Sua mensagem aqui" "$work_dir/$file_name"
+# Gerar a figurinha
+gerar_figurinha
 
-echo "Figurinha gerada com sucesso em: $work_dir/$file_name"
+# Travar a tela
+travar_tela

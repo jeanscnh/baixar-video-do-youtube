@@ -15,16 +15,16 @@ mkdir -p "$caminho_downloads/YouTubeDownloads"
 menu() {
     clear
     echo "Escolha uma opção:"
-    echo "1. Baixar MP4 (somente áudio)"
+    echo "1. Baixar MP3"
     echo "2. Baixar vídeo em 720p"
     echo "3. Baixar vídeo em 1080p"
     echo "4. Sair"
 }
 
-baixar_mp4() {
+baixar_mp3() {
     read -p "Digite a URL do vídeo do YouTube: " youtube_url
 
-    # Executa o script Python para baixar apenas o áudio do vídeo em formato MP4
+    # Executa o script Python para baixar o vídeo em MP3
     python3 -c "from pytube import YouTube; yt = YouTube('$youtube_url'); stream = yt.streams.filter(only_audio=True).first(); stream.download(output_path='$caminho_downloads/YouTubeDownloads')"
 }
 
@@ -48,7 +48,7 @@ while true; do
     read -p "Opção: " opcao
 
     case $opcao in
-        1) baixar_mp4 ;;
+        1) baixar_mp3 ;;
         2) baixar_720p ;;
         3) baixar_1080p ;;
         4) exit ;;

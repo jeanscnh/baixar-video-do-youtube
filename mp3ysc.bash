@@ -1,34 +1,33 @@
 #!/bin/bash
 
-# Função para exibir a mensagem de boas-vindas
-exibir_boas_vindas() {
-    echo "Bem-vindo ao Consulta CPF!"
-    echo "Este script realizará uma consulta de CPF utilizando a biblioteca cpf-gratis."
-    echo "Por favor, siga as instruções abaixo para fornecer os dados necessários."
-    echo ""
-}
+# Instala o PHP e o Composer se ainda não estiverem instalados
+pkg update
+pkg upgrade
+pkg install php
+pkg install composer
 
-# Função para realizar a consulta de CPF
-consultar_cpf() {
-    echo "Digite o CPF que deseja consultar (apenas números):"
-    read -p "> " cpf
+# Inicializa um novo projeto PHP e instala o pacote cpf-gratis
+mkdir consultar-cpf
+cd consultar-cpf
+composer init -n
+composer require jansenfelipe/cpf-gratis
 
-    echo "Digite a data de nascimento associada ao CPF (formato: DDMMYYYY):"
-    read -p "> " data_nascimento
-
-    echo "Digite as letras do Captcha (caso necessário):"
-    read -p "> " captcha
-
-    # Cria um arquivo PHP para realizar a consulta de CPF
-    cat <<EOF > consulta_cpf.php
+# Cria um arquivo PHP para realizar as consultas de CPF
+cat <<EOF > consulta_cpf.php
 <?php
 
 require_once 'vendor/autoload.php';
 
-\$params = JansenFelipe\CpfGratis\CpfGratis::getParams();
-\$cpf = '$cpf';
-\$data_nascimento = '$data_nascimento';
-\$captcha = '$captcha';
+\$params = JansenFelipe\CpfGratis\CpfGratis::getParams(); 
+
+echo "Digite o CPF que deseja consultar (apenas números):" . PHP_EOL;
+\$cpf = readline("> ");
+
+echo "Digite a data de nascimento associada ao CPF (formato: DDMMYYYY):" . PHP_EOL;
+\$data_nascimento = readline("> ");
+
+echo "Digite as letras do Captcha (deixe em branco se não houver):" . PHP_EOL;
+\$captcha = readline("> ");
 
 \$dadosPessoa = JansenFelipe\CpfGratis\CpfGratis::consulta(
     \$cpf,
@@ -39,18 +38,7 @@ require_once 'vendor/autoload.php';
 );
 
 print_r(\$dadosPessoa);
-?>
 EOF
 
-    # Executa o arquivo PHP para realizar a consulta de CPF
-    php consulta_cpf.php
-}
-
-# Função principal
-principal() {
-    exibir_boas_vindas
-    consultar_cpf
-}
-
-# Chama a função principal
-principal
+# Executa o script PHP para iniciar uma consulta de CPF
+php consulta_cpf.php

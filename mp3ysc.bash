@@ -1,44 +1,34 @@
-import requests
-from bs4 import BeautifulSoup
+#!/bin/bash
 
-def consultar_cpf(cpf):
-    url = f"https://servicos.receita.fazenda.gov.br/Servicos/cpf/{cpf}/ConsultaSituacao/CPFConsulta.asp"
-    try:
-        response = requests.get(url)
-        response.raise_for_status()  # Verificar se houve erro na requisição
+consultar_cpf() {
+    local cpf="$1"
+    local url="https://servicos.receita.fazenda.gov.br/Servicos/cpf/${cpf}/ConsultaSituacao/CPFConsulta.asp"
+    local response=$(curl -s "$url")
 
-        soup = BeautifulSoup(response.content, 'html.parser')
-        nome_element = soup.find("span", id="txtNome")
-        if nome_element:
-            nome = nome_element.text.strip()
-        else:
-            nome = "Nome não encontrado."
+    # Extrair nome
+    nome=$(echo "$response" | grep -oP '(?<=<span id="txtNome">)[^<]+')
+    if [ -z "$nome" ]; then
+        nome="Nome não encontrado."
+    fi
 
-        situacao_element = soup.find("span", id="txtSituacao")
-        if situacao_element:
-            situacao = situacao_element.text.strip()
-        else:
-            situacao = "Situação não encontrada."
+    # Extrair situação cadastral
+    situacao=$(echo "$response" | grep -oP '(?<=<span id="txtSituacao">)[^<]+')
+    if [ -z "$situacao" ]; then
+        situacao="Situação cadastral não encontrada."
+    fi
 
-        data_nascimento_element = soup.find("span", id="txtDtNascimento")
-        if data_nascimento_element:
-            data_nascimento = data_nascimento_element.text.strip()
-        else:
-            data_nascimento = "Data de nascimento não encontrada."
+    # Extrair data de nascimento
+    data_nascimento=$(echo "$response" | grep -oP '(?<=<span id="txtDtNascimento">)[^<]+')
+    if [ -z "$data_nascimento" ]; then
+        data_nascimento="Data de nascimento não encontrada."
+    fi
 
-        return {"nome": nome, "situacao": situacao, "data_nascimento": data_nascimento}
-    
-    except requests.exceptions.RequestException as e:
-        return {"error": f"Erro na requisição HTTP: {str(e)}"}
-    except Exception as e:
-        return {"error": f"Erro inesperado: {str(e)}"}
+    # Exibir informações
+    echo "Nome: $nome"
+    echo "Situação Cadastral: $situacao"
+    echo "Data de Nascimento: $data_nascimento"
+}
 
 # Teste
-cpf = input("Digite o CPF: ")
-informacoes = consultar_cpf(cpf)
-if "error" in informacoes:
-    print(informacoes["error"])
-else:
-    print("Nome:", informacoes["nome"])
-    print("Situação:", informacoes["situacao"])
-    print("Data de Nascimento:", informacoes["data_nascimento"])
+read -p "Digite o CPF: " cpf
+consultar_cpf "$cpf"

@@ -15,7 +15,7 @@ exibir_resultado() {
     local situacao=$(echo "$resultado_json" | jq -r '.situacao')
     local data=$(echo "$resultado_json" | jq -r '.data')
     local mensagem=$(echo "$resultado_json" | jq -r '.mensagem')
-    
+
     echo "Nome: $nome"
     echo "Situação: $situacao"
     echo "Data: $data"
@@ -36,17 +36,25 @@ main() {
     echo "---------------------"
     read -p "Digite o CPF: " cpf
 
-    if [ ${#cpf} -ne 11 ] || ! [[ $cpf =~ ^[0-9]+$ ]]; then
+    if ! [[ $cpf =~ ^[0-9]{11}$ ]]; then
         echo "CPF inválido. Por favor, insira um CPF válido com 11 dígitos numéricos."
         exit 1
     fi
 
     resultado=$(consultar_cpf "$cpf")
 
-    if [ "$(echo "$resultado" | jq -r '.status')" = "OK" ]; then
+    if [[ -z $resultado ]]; then
+        echo "Erro ao consultar o CPF. Verifique sua conexão com a internet ou tente novamente mais tarde."
+        exit 1
+    fi
+
+    status=$(echo "$resultado" | jq -r '.status')
+
+    if [[ $status == "OK" ]]; then
         exibir_resultado "$resultado"
     else
-        echo "Erro: $(echo "$resultado" | jq -r '.error')"
+        mensagem_erro=$(echo "$resultado" | jq -r '.mensagem')
+        echo "Erro: $mensagem_erro"
     fi
 }
 

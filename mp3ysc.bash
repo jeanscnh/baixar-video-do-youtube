@@ -1,31 +1,54 @@
 #!/bin/bash
 
-# Figura do emoji
-emoji='[
-[0, 0, 1, 1, 1, 1, 0, 0],
-[0, 1, 1, 1, 1, 1, 1, 0],
-[1, 1, 1, 1, 1, 1, 1, 1],
-[1, 1, 1, 1, 1, 1, 1, 1],
-[1, 1, 1, 1, 1, 1, 1, 1],
-[1, 1, 1, 1, 1, 1, 1, 1],
-[0, 1, 1, 1, 1, 1, 1, 0],
-[0, 0, 1, 1, 1, 1, 0, 0]
-]'
+# Função para realizar a consulta de CPF
+consultar_cpf() {
+    local cpf=$1
+    local url="https://api.cpfcnpj.com.br/5f702c7c350a970b4a8a3324f9624bfc/consultar-cpf/$cpf"
+    local resposta=$(curl -s "$url")
+    echo "$resposta"
+}
 
-# Exibir o emoji usando o comando 'echo'
-echo "$emoji" | python -c "
-import matplotlib.pyplot as plt
+# Função para exibir o resultado da consulta
+exibir_resultado() {
+    local resultado_json="$1"
+    local nome=$(echo "$resultado_json" | jq -r '.nome')
+    local situacao=$(echo "$resultado_json" | jq -r '.situacao')
+    local data=$(echo "$resultado_json" | jq -r '.data')
+    local mensagem=$(echo "$resultado_json" | jq -r '.mensagem')
+    
+    echo "Nome: $nome"
+    echo "Situação: $situacao"
+    echo "Data: $data"
+    echo "Mensagem: $mensagem"
+}
 
-# Plotar o emoji
-plt.imshow($emoji, cmap='gray')
-plt.axis('off')  # Desativar eixos
-plt.show()
-"
+# Verificar se o jq está instalado
+if ! command -v jq &> /dev/null; then
+    echo "O comando jq não foi encontrado. Instalando jq..."
+    pkg install jq -y
+    clear
+fi
 
-# Tempo de pausa em segundos
-tempo_de_pausa=120  # 2 minutos
+# Função principal
+main() {
+    clear
+    echo "Consulta de CPF"
+    echo "---------------------"
+    read -p "Digite o CPF: " cpf
 
-# Pausa a execução por um determinado período de tempo
-echo "A tela ficará estática por $tempo_de_pausa segundos."
-sleep $tempo_de_pausa
-echo "Tempo esgotado. Saindo..."
+    if [ ${#cpf} -ne 11 ] || ! [[ $cpf =~ ^[0-9]+$ ]]; then
+        echo "CPF inválido. Por favor, insira um CPF válido com 11 dígitos numéricos."
+        exit 1
+    fi
+
+    resultado=$(consultar_cpf "$cpf")
+
+    if [ "$(echo "$resultado" | jq -r '.status')" = "OK" ]; then
+        exibir_resultado "$resultado"
+    else
+        echo "Erro: $(echo "$resultado" | jq -r '.error')"
+    fi
+}
+
+# Chamada da função principal
+main

@@ -1,41 +1,23 @@
-#!/bin/bash
+import requests
+from bs4 import BeautifulSoup
 
-# Função para realizar a consulta de CPF
-consultar_cpf() {
-    local cpf=$1
-    local url="https://consulta-situacao-cpf.com/$cpf"
-    local resposta=$(curl -s "$url")
-    echo "$resposta"
-}
+def consultar_cpf(cpf):
+    url = f"https://www.consulta-cpf-gratis.com.br/api/{cpf}"
+    response = requests.get(url)
 
-# Função principal
-main() {
-    clear
-    echo "Consulta de CPF"
-    echo "---------------------"
-    read -p "Digite o CPF: " cpf
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print("Erro ao consultar a API.")
+        return None
 
-    if ! [[ $cpf =~ ^[0-9]{11}$ ]]; then
-        echo "CPF inválido. Por favor, insira um CPF válido com 11 dígitos numéricos."
-        exit 1
-    fi
+# Teste
+cpf = input("Digite o CPF: ")
+informacoes = consultar_cpf(cpf)
 
-    resultado=$(consultar_cpf "$cpf")
-
-    # Extrair informações do HTML
-    nome=$(echo "$resultado" | grep -oP '(?<=Nome: <strong>)[^<]+')
-    situacao=$(echo "$resultado" | grep -oP '(?<=Situação: <strong>)[^<]+')
-    data=$(echo "$resultado" | grep -oP '(?<=Data: <strong>)[^<]+')
-    cidade=$(echo "$resultado" | grep -oP '(?<=Cidade: <strong>)[^<]+')
-    estado=$(echo "$resultado" | grep -oP '(?<=Estado: <strong>)[^<]+')
-
-    # Exibir resultados
-    echo "Nome: $nome"
-    echo "Situação: $situacao"
-    echo "Data: $data"
-    echo "Cidade: $cidade"
-    echo "Estado: $estado"
-}
-
-# Chamada da função principal
-main
+if informacoes:
+    print("Nome:", informacoes["nome"])
+    print("Situação:", informacoes["situacao"])
+    print("Data de Nascimento:", informacoes["data_nascimento"])
+else:
+    print("Consulta falhou.")

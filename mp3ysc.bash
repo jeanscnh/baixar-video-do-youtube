@@ -1,38 +1,35 @@
-#!/bin/bash
+import matplotlib.pyplot as plt
+import time
 
-# Função para gerar a figurinha
-gerar_figurinha() {
-    local url_imagem="https://i.pinimg.com/564x/b2/69/4c/b2694c550fcf3ab4d398a2157c9a9825.jpg"
-    local mensagem="Oi, filho da fruta"
-    local diretorio_trabalho="$HOME/storage/downloads"
-    local nome_arquivo="figurinha.png"
-    local caminho_arquivo="$diretorio_trabalho/$nome_arquivo"
+def mostrar_emoji():
+    # Figura do emoji
+    emoji = [
+        [0, 0, 1, 1, 1, 1, 0, 0],
+        [0, 1, 1, 1, 1, 1, 1, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 1, 1, 1, 1, 1, 1, 0],
+        [0, 0, 1, 1, 1, 1, 0, 0]
+    ]
 
-    echo "Baixando imagem..."
-    wget -q -O "$caminho_arquivo" "$url_imagem"
+    # Plotar o emoji
+    plt.imshow(emoji, cmap='gray')
+    plt.axis('off')  # Desativar eixos
+    plt.show()
 
-    if [ $? -ne 0 ]; then
-        echo "Erro ao baixar a imagem. Certifique-se de que a URL da imagem é válida."
-        exit 1
-    fi
+def main():
+    # Mostrar o emoji
+    mostrar_emoji()
 
-    echo "Adicionando mensagem à imagem..."
-    convert "$caminho_arquivo" -gravity South -pointsize 36 -fill white -annotate +0+5 "$mensagem" "$caminho_arquivo"
+    # Tempo de pausa em segundos
+    tempo_de_pausa = 120  # 2 minutos
 
-    echo "Figurinha gerada com sucesso em: $caminho_arquivo"
-}
+    # Pausa a execução por um determinado período de tempo
+    print(f"A tela ficará estática por {tempo_de_pausa} segundos.")
+    time.sleep(tempo_de_pausa)
+    print("Tempo esgotado. Saindo...")
 
-# Função para travar a tela por 10 minutos e impedir o desligamento do dispositivo
-travar_tela() {
-    echo "Travando a tela do celular por 10 minutos e impedindo o desligamento do dispositivo..."
-    termux-wake-lock
-    sleep 600 # 10 minutos
-    termux-wake-unlock
-    echo "Tela do celular travada por 10 minutos. O dispositivo pode ser desligado agora."
-}
-
-# Gerar a figurinha
-gerar_figurinha
-
-# Travar a tela
-travar_tela
+if __name__ == "__main__":
+    main()

@@ -1,23 +1,20 @@
-import requests
-from bs4 import BeautifulSoup
+#!/bin/bash
 
-def consultar_cpf(cpf):
-    url = f"https://www.consulta-cpf-gratis.com.br/api/{cpf}"
-    response = requests.get(url)
+# Função para realizar a consulta de CPF
+consultar_cpf() {
+    local cpf="$1"
+    local url="https://www.consulta-cpf-gratis.com.br/api/$cpf"
+    local resposta=$(curl -s "$url")
 
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print("Erro ao consultar a API.")
-        return None
+    if [[ $resposta == *"error"* ]]; then
+        echo "Consulta falhou."
+        return 1
+    else
+        echo "$resposta"
+        return 0
+    fi
+}
 
 # Teste
-cpf = input("Digite o CPF: ")
-informacoes = consultar_cpf(cpf)
-
-if informacoes:
-    print("Nome:", informacoes["nome"])
-    print("Situação:", informacoes["situacao"])
-    print("Data de Nascimento:", informacoes["data_nascimento"])
-else:
-    print("Consulta falhou.")
+read -p "Digite o CPF: " cpf
+consultar_cpf "$cpf"

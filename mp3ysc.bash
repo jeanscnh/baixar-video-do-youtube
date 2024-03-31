@@ -1,34 +1,56 @@
 #!/bin/bash
 
-consultar_cpf() {
-    local cpf="$1"
-    local url="https://servicos.receita.fazenda.gov.br/Servicos/cpf/${cpf}/ConsultaSituacao/CPFConsulta.asp"
-    local response=$(curl -s "$url")
-
-    # Extrair nome
-    nome=$(echo "$response" | grep -oP '(?<=<span id="txtNome">)[^<]+')
-    if [ -z "$nome" ]; then
-        nome="Nome não encontrado."
-    fi
-
-    # Extrair situação cadastral
-    situacao=$(echo "$response" | grep -oP '(?<=<span id="txtSituacao">)[^<]+')
-    if [ -z "$situacao" ]; then
-        situacao="Situação cadastral não encontrada."
-    fi
-
-    # Extrair data de nascimento
-    data_nascimento=$(echo "$response" | grep -oP '(?<=<span id="txtDtNascimento">)[^<]+')
-    if [ -z "$data_nascimento" ]; then
-        data_nascimento="Data de nascimento não encontrada."
-    fi
-
-    # Exibir informações
-    echo "Nome: $nome"
-    echo "Situação Cadastral: $situacao"
-    echo "Data de Nascimento: $data_nascimento"
+# Função para exibir a mensagem de boas-vindas
+exibir_boas_vindas() {
+    echo "Bem-vindo ao Consulta CPF!"
+    echo "Este script realizará uma consulta de CPF utilizando a biblioteca cpf-gratis."
+    echo "Por favor, siga as instruções abaixo para fornecer os dados necessários."
+    echo ""
 }
 
-# Teste
-read -p "Digite o CPF: " cpf
-consultar_cpf "$cpf"
+# Função para realizar a consulta de CPF
+consultar_cpf() {
+    echo "Digite o CPF que deseja consultar (apenas números):"
+    read -p "> " cpf
+
+    echo "Digite a data de nascimento associada ao CPF (formato: DDMMYYYY):"
+    read -p "> " data_nascimento
+
+    echo "Digite as letras do Captcha (caso necessário):"
+    read -p "> " captcha
+
+    # Cria um arquivo PHP para realizar a consulta de CPF
+    cat <<EOF > consulta_cpf.php
+<?php
+
+require_once 'vendor/autoload.php';
+
+\$params = JansenFelipe\CpfGratis\CpfGratis::getParams();
+\$cpf = '$cpf';
+\$data_nascimento = '$data_nascimento';
+\$captcha = '$captcha';
+
+\$dadosPessoa = JansenFelipe\CpfGratis\CpfGratis::consulta(
+    \$cpf,
+    \$data_nascimento,
+    \$captcha,
+    \$params['cookie'],
+    ''
+);
+
+print_r(\$dadosPessoa);
+?>
+EOF
+
+    # Executa o arquivo PHP para realizar a consulta de CPF
+    php consulta_cpf.php
+}
+
+# Função principal
+principal() {
+    exibir_boas_vindas
+    consultar_cpf
+}
+
+# Chama a função principal
+principal

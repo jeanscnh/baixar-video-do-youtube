@@ -1,44 +1,19 @@
-#!/bin/bash
-
-# Instala o PHP e o Composer se ainda não estiverem instalados
-pkg update
-pkg upgrade
-pkg install php
-pkg install composer
-
-# Inicializa um novo projeto PHP e instala o pacote cpf-gratis
-mkdir consultar-cpf
-cd consultar-cpf
-composer init -n
-composer require jansenfelipe/cpf-gratis
-
-# Cria um arquivo PHP para realizar as consultas de CPF
-cat <<EOF > consulta_cpf.php
-<?php
-
-require_once 'vendor/autoload.php';
-
-\$params = JansenFelipe\CpfGratis\CpfGratis::getParams(); 
-
-echo "Digite o CPF que deseja consultar (apenas números):" . PHP_EOL;
-\$cpf = readline("> ");
-
-echo "Digite a data de nascimento associada ao CPF (formato: DDMMYYYY):" . PHP_EOL;
-\$data_nascimento = readline("> ");
-
-echo "Digite as letras do Captcha (deixe em branco se não houver):" . PHP_EOL;
-\$captcha = readline("> ");
-
-\$dadosPessoa = JansenFelipe\CpfGratis\CpfGratis::consulta(
-    \$cpf,
-    \$data_nascimento,
-    \$captcha,
-    \$params['cookie'],
-    ''
-);
-
-print_r(\$dadosPessoa);
-EOF
-
-# Executa o script PHP para iniciar uma consulta de CPF
-php consulta_cpf.php
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensagem Importante</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+            color: red; /* Texto em vermelho */
+        }
+    </style>
+</head>
+<body>
+    <h1>Vai se f*der, filho da fruta!</h1>
+</body>
+</html>
